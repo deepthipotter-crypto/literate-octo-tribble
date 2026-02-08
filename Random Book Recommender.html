@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Discover your next great read with curated book recommendations and reading lists">
+    <meta name="theme-color" content="#D92B2B">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Shelf">
+    <link rel="manifest" href="book-manifest.json">
+    <link rel="apple-touch-icon" href="icons/book-icon-192.png">
+    <title>Shelf - Book Recommendations</title>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bauhaus-red: #D92B2B;
+            --bauhaus-blue: #1E5B9E;
+            --bauhaus-yellow: #F1B422;
+            --bauhaus-black: #1A1A1A;
+            --bauhaus-cream: #E8E4D9;
+            --bauhaus-teal: #3E7E8E;
+            --text-primary: #1A1A1A;
+            --text-secondary: #5A5A5A;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bauhaus-cream);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Bauhaus geometric background pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(45deg, transparent 48%, var(--bauhaus-yellow) 48%, var(--bauhaus-yellow) 52%, transparent 52%),
+                linear-gradient(-45deg, transparent 48%, var(--bauhaus-red) 48%, var(--bauhaus-red) 52%, transparent 52%);
+            background-size: 800px 800px;
+            background-position: 0 0, 400px 400px;
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            background: var(--bauhaus-cream);
+        }
+        
+        /* Header */
+        header {
+            padding: 40px 24px 32px;
+            text-align: center;
+            background: var(--bauhaus-black);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Geometric accent in header */
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: var(--bauhaus-red);
+            border-radius: 50%;
+            opacity: 0.2;
+        }
+        
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: -30px;
+            width: 100px;
+            height: 100px;
+            background: var(--bauhaus-yellow);
+            transform: rotate(45deg);
+            opacity: 0.2;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        h1 {
+            font-family: 'Crimson Pro', serif;
+            font-size: 48px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .tagline {
+            font-size: 14px;
+            color: var(--bauhaus-yellow);
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Quiz Section */
+        .quiz-section {
+            padding: 32px 24px;
+            animation: fadeIn 0.8s ease-out 0.2s backwards;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .question-card {
+            background: white;
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+            border: 1px solid #D0CCC1;
+            transition: all 0.3s ease;
+        }
+        
+        .question-card:hover {
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .question-label {
+            font-family: 'Crimson Pro', serif;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--bauhaus-black);
+            display: block;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #D0CCC1;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: 'DM Sans', sans-serif;
+            background: white;
+            color: var(--bauhaus-black);
+            transition: all 0.3s ease;
+            appearance: none;
+            cursor: pointer;
+        }
+        
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%232C2416' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 40px;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--bauhaus-red);
+            box-shadow: 0 0 0 3px rgba(199, 123, 92, 0.1);
+        }
+        
+        .chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        
+        .chip {
+            padding: 10px 18px;
+            border: 2px solid #D0CCC1;
+            border-radius: 24px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--bauhaus-black);
+        }
+        
+        .chip:hover {
+            border-color: var(--bauhaus-red);
+            background: rgba(199, 123, 92, 0.05);
+        }
+        
+        .chip.selected {
+            background: var(--bauhaus-red);
+            border-color: var(--bauhaus-red);
+            color: white;
+        }
+        
+        .get-recommendations-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--bauhaus-red) 0%, #B36A4F 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 16px rgba(199, 123, 92, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 8px;
+        }
+        
+        .get-recommendations-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(199, 123, 92, 0.4);
+        }
+        
+        .get-recommendations-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        
+        .get-recommendations-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 40px 24px;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #D0CCC1;
+            border-top-color: var(--bauhaus-red);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-family: 'Crimson Pro', serif;
+            font-size: 18px;
+            color: var(--bauhaus-black);
+            font-style: italic;
+        }
+        
+        /* Results Section */
+        .results-section {
+            padding: 32px 24px;
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        .results-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .results-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--bauhaus-black);
+            margin-bottom: 12px;
+        }
+        
+        .results-subtitle {
+            font-size: 15px;
+            color: var(--bauhaus-red);
+            font-style: italic;
+        }
+        
+        .book-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid var(--bauhaus-red);
+            transition: all 0.3s ease;
+            animation: slideUp 0.5s ease-out backwards;
+        }
+        
+        .book-card:nth-child(1) { animation-delay: 0.1s; }
+        .book-card:nth-child(2) { animation-delay: 0.2s; }
+        .book-card:nth-child(3) { animation-delay: 0.3s; }
+        .book-card:nth-child(4) { animation-delay: 0.4s; }
+        .book-card:nth-child(5) { animation-delay: 0.5s; }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .book-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+        }
+        
+        .book-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--bauhaus-black);
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+        
+        .book-author {
+            font-size: 15px;
+            color: var(--bauhaus-red);
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+        
+        .book-description {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #5A5047;
+            margin-bottom: 12px;
+        }
+        
+        .book-match {
+            display: inline-block;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, var(--bauhaus-blue) 0%, #7A8A6F 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .try-again-btn {
+            width: 100%;
+            padding: 16px;
+            background: white;
+            color: var(--bauhaus-black);
+            border: 2px solid var(--bauhaus-black);
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .try-again-btn:hover {
+            background: var(--bauhaus-black);
+            color: white;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Editor's Picks */
+        .editors-picks {
+            padding: 32px 24px;
+            animation: fadeIn 0.8s ease-out 0.4s backwards;
+        }
+        
+        .filter-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid #D0CCC1;
+            border-radius: 20px;
+            background: white;
+            color: var(--bauhaus-black);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn:hover {
+            border-color: var(--bauhaus-red);
+        }
+        
+        .filter-btn.active {
+            background: var(--bauhaus-red);
+            border-color: var(--bauhaus-red);
+            color: white;
+        }
+        
+        .section-header {
+            font-family: 'Crimson Pro', serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--bauhaus-black);
+            margin-bottom: 8px;
+        }
+        
+        .section-subheader {
+            font-size: 14px;
+            color: var(--bauhaus-red);
+            margin-bottom: 24px;
+            font-style: italic;
+        }
+        
+        .picks-grid {
+            display: grid;
+            gap: 16px;
+        }
+        
+        .pick-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            border-left: 3px solid var(--bauhaus-yellow);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .pick-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .pick-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--bauhaus-black);
+            margin-bottom: 4px;
+        }
+        
+        .pick-author {
+            font-size: 13px;
+            color: var(--bauhaus-red);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .pick-snippet {
+            font-size: 13px;
+            line-height: 1.5;
+            color: #5A5047;
+        }
+        
+        .pick-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: var(--bauhaus-yellow);
+            color: white;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 8px;
+        }
+        
+        /* Reading List */
+        .reading-list {
+            padding: 32px 24px 80px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.5) 0%, rgba(250,247,240,0.5) 100%);
+        }
+        
+        .list-empty {
+            text-align: center;
+            padding: 40px 24px;
+            color: #8B7E6F;
+            font-style: italic;
+        }
+        
+        .list-item {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            animation: slideUp 0.4s ease-out backwards;
+        }
+        
+        .list-item:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+        
+        .list-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #D0CCC1;
+            border-radius: 6px;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .list-checkbox.checked {
+            background: var(--bauhaus-blue);
+            border-color: var(--bauhaus-blue);
+        }
+        
+        .list-checkbox.checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .list-content {
+            flex: 1;
+        }
+        
+        .list-item-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--bauhaus-black);
+            margin-bottom: 2px;
+        }
+        
+        .list-item.completed .list-item-title {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+        
+        .list-item-author {
+            font-size: 12px;
+            color: #8B7E6F;
+        }
+        
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #C77B5C;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+            opacity: 0.6;
+            transition: opacity 0.3s ease;
+        }
+        
+        .remove-btn:hover {
+            opacity: 1;
+        }
+        
+        .add-to-list-btn {
+            background: white;
+            border: 2px solid var(--bauhaus-blue);
+            color: var(--bauhaus-blue);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .add-to-list-btn:hover {
+            background: var(--bauhaus-blue);
+            color: white;
+        }
+        
+        .add-to-list-btn.added {
+            background: var(--bauhaus-blue);
+            color: white;
+            border-color: var(--bauhaus-blue);
+        }
+        
+        .clear-list-btn {
+            width: 100%;
+            padding: 12px;
+            background: transparent;
+            color: #8B7E6F;
+            border: 1px solid #E8E3DA;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .clear-list-btn:hover {
+            background: #FFF5F5;
+            border-color: #C77B5C;
+            color: #C77B5C;
+        }
+        
+        /* Recommendation Cards */
+        .rec-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid var(--bauhaus-red);
+            transition: all 0.3s ease;
+            animation: slideUp 0.4s ease-out backwards;
+        }
+        
+        .rec-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        }
+        
+        .rec-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--bauhaus-black);
+            margin-bottom: 4px;
+        }
+        
+        .rec-author {
+            font-size: 14px;
+            color: var(--bauhaus-red);
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .rec-snippet {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #5A5047;
+            margin-bottom: 12px;
+        }
+        
+        /* Admin Mode Controls */
+        .admin-controls {
+            display: none;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #D0CCC1;
+        }
+        
+        .admin-mode .admin-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .edit-pick-btn, .delete-pick-btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .edit-pick-btn {
+            background: var(--bauhaus-yellow);
+            color: white;
+            flex: 1;
+        }
+        
+        .edit-pick-btn:hover {
+            background: #C19A66;
+        }
+        
+        .delete-pick-btn {
+            background: #FFE5E5;
+            color: #C77B5C;
+        }
+        
+        .delete-pick-btn:hover {
+            background: #C77B5C;
+            color: white;
+        }
+        
+        .add-pick-btn {
+            width: 100%;
+            padding: 16px;
+            background: white;
+            border: 2px dashed #D0CCC1;
+            border-radius: 12px;
+            color: var(--bauhaus-black);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+            display: none;
+        }
+        
+        .admin-mode .add-pick-btn {
+            display: block;
+        }
+        
+        .add-pick-btn:hover {
+            border-color: var(--bauhaus-red);
+            background: rgba(199, 123, 92, 0.05);
+        }
+        
+        /* Modal for editing picks */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(44, 36, 22, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideUp 0.3s ease-out;
+        }
+        
+        @keyframes modalSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-header {
+            font-family: 'Crimson Pro', serif;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--bauhaus-black);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--bauhaus-black);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #D0CCC1;
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--bauhaus-black);
+            transition: all 0.3s ease;
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--bauhaus-red);
+            box-shadow: 0 0 0 3px rgba(199, 123, 92, 0.1);
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .modal-btn-primary {
+            background: var(--bauhaus-red);
+            color: white;
+        }
+        
+        .modal-btn-primary:hover {
+            background: #B36A4F;
+        }
+        
+        .modal-btn-secondary {
+            background: #D0CCC1;
+            color: var(--bauhaus-black);
+        }
+        
+        .modal-btn-secondary:hover {
+            background: #D8D3CA;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Shelf</h1>
+            <p class="tagline">Discover Your Next Great Read</p>
+        </header>
+        
+        <div id="quizSection" class="quiz-section">
+            <h2 class="section-title">📖 Random Book Generator</h2>
+            <p class="section-subheader">Not sure what to read? Let us pick for you!</p>
+            
+            <div class="question-card">
+                <label class="question-label">Choose a category (optional)</label>
+                <select id="categorySelect" style="width: 100%; padding: 14px 16px; border: 2px solid #D0CCC1; border-radius: 12px; font-size: 15px; font-family: 'DM Sans', sans-serif;">
+                    <option value="all">All Books</option>
+                    <option value="Fiction">Fiction</option>
+                    <option value="Nonfiction">Nonfiction</option>
+                    <option value="Philosophy">Philosophy</option>
+                    <option value="Women Writers">Women Writers</option>
+                </select>
+            </div>
+            
+            <button class="get-recommendations-btn" id="getRandomBtn">🎲 Get Random Book</button>
+            
+            <div id="randomBookDisplay" style="margin-top: 24px; display: none;">
+                <div id="randomBookCard"></div>
+            </div>
+            
+            <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #D0CCC1;">
+                <h3 class="section-title" style="font-size: 18px; margin-bottom: 16px;">Add Custom Book</h3>
+                <div class="question-card" style="margin-bottom: 12px;">
+                    <label class="question-label">Book Title</label>
+                    <input type="text" id="manualTitle" placeholder="e.g., The Great Gatsby" style="width: 100%; padding: 14px 16px; border: 2px solid #D0CCC1; border-radius: 12px; font-size: 15px; font-family: 'DM Sans', sans-serif;">
+                </div>
+                
+                <div class="question-card" style="margin-bottom: 12px;">
+                    <label class="question-label">Author Name</label>
+                    <input type="text" id="manualAuthor" placeholder="e.g., F. Scott Fitzgerald" style="width: 100%; padding: 14px 16px; border: 2px solid #D0CCC1; border-radius: 12px; font-size: 15px; font-family: 'DM Sans', sans-serif;">
+                </div>
+                
+                <button class="get-recommendations-btn" id="addManualBookBtn" style="background: var(--bauhaus-blue);">Add to Reading List</button>
+            </div>
+        </div>
+        
+        <div class="reading-list">
+            <h2 class="section-header">My Reading List</h2>
+            <p class="section-subheader">Books to read later</p>
+            <div id="readingListContainer">
+                <div class="list-empty">Your reading list is empty. Add books from recommendations or editor's picks!</div>
+            </div>
+            <button class="clear-list-btn hidden" id="clearListBtn">Clear Completed</button>
+        </div>
+        
+        <div class="editors-picks" id="editorsPicks">
+            <h2 class="section-header">Editor's Picks</h2>
+            <p class="section-subheader">Curated recommendations across genres</p>
+            
+            <div class="filter-controls">
+                <button class="filter-btn active" data-filter="all">All Books</button>
+                <button class="filter-btn" data-filter="Fiction">Fiction</button>
+                <button class="filter-btn" data-filter="Nonfiction">Nonfiction</button>
+                <button class="filter-btn" data-filter="Philosophy">Philosophy</button>
+                <button class="filter-btn" data-filter="Women Writers">Women Writers</button>
+            </div>
+            
+            <div class="picks-grid" id="picksGrid"></div>
+        </div>
+    </div>
+    
+    <script>
+        // State
+        let selectedMood = '';
+        let readingList = JSON.parse(localStorage.getItem('readingList') || '[]');
+        // Complete book database for random generator (not all shown in editor's picks)
+        const completeBookDatabase = [
+            // FICTION - Original + Expanded
+            { title: "The Days of Abandonment", author: "Elena Ferrante", snippet: "A devastating portrait of a woman's psychological unraveling after her husband leaves her.", badge: "Fiction" },
+            { title: "House of Leaves", author: "Mark Z Danielewski", snippet: "An experimental horror novel that defies conventional storytelling with its unique structure.", badge: "Fiction" },
+            { title: "The Recognitions", author: "William Gaddis", snippet: "A sprawling postmodern masterpiece exploring authenticity, art, and the nature of forgery.", badge: "Fiction" },
+            { title: "1Q84", author: "Haruki Murakami", snippet: "A mind-bending parallel world tale where two moons hang in the sky and reality shifts.", badge: "Fiction" },
+            { title: "Demon Copperhead", author: "Barbara Kingsolver", snippet: "A modern retelling of David Copperfield set in Appalachia, exploring poverty and resilience.", badge: "Fiction" },
+            { title: "East of Eden", author: "John Steinbeck", snippet: "An epic family saga exploring good and evil through generations in California's Salinas Valley.", badge: "Fiction" },
+            { title: "The Weight of Ink", author: "Rachel Kadish", snippet: "A sweeping historical novel about a blind rabbi's scribe in 17th-century London.", badge: "Fiction" },
+            { title: "Avenger", author: "Frederick Forsyth", snippet: "A gripping thriller following a Vietnam veteran's quest for justice and vengeance.", badge: "Fiction" },
+            { title: "Going Postal", author: "Terry Pratchett", snippet: "A hilarious Discworld adventure about reviving a decrepit postal service against all odds.", badge: "Fiction" },
+            { title: "The Housemaid", author: "Freida McFadden", snippet: "A twisted psychological thriller with jaw-dropping reveals that will keep you guessing.", badge: "Fiction" },
+            { title: "A Flicker in the Dark", author: "Stacy Willingham", snippet: "A psychologist's life unravels when murders echo her father's crimes from decades ago.", badge: "Fiction" },
+            { title: "The Silent Patient", author: "Alex Michaelides", snippet: "A woman shoots her husband and never speaks again—until a psychotherapist becomes obsessed.", badge: "Fiction" },
+            { title: "World War Z", author: "Max Brooks", snippet: "An oral history of humanity's war against the zombie pandemic, told through survivor accounts.", badge: "Fiction" },
+            { title: "Wonderstruck", author: "Brian Selznick", snippet: "Two stories, fifty years apart, interweave through stunning illustrations and prose.", badge: "Fiction" },
+            { title: "The Invention of Hugo Cabret", author: "Brian Selznick", snippet: "A beautifully illustrated tale of an orphan living in a Paris train station with a secret.", badge: "Fiction" },
+            { title: "A Monster Calls", author: "Patrick Ness", snippet: "A haunting story of grief as a boy is visited by a monster at seven minutes past midnight.", badge: "Fiction" },
+            { title: "Slaughterhouse-Five", author: "Kurt Vonnegut", snippet: "A darkly comic anti-war novel following Billy Pilgrim through time and the bombing of Dresden.", badge: "Fiction" },
+            { title: "The Elephant Vanishes", author: "Haruki Murakami", snippet: "Surreal short stories blending the mundane with the fantastical in Murakami's signature style.", badge: "Fiction" },
+            { title: "On the Eve", author: "Ivan Turgenev", snippet: "A Russian classic exploring love, idealism, and revolution on the brink of social change.", badge: "Fiction" },
+            { title: "The Dharma Forest", author: "Keerthik Sasidharan", snippet: "An epic retelling of the Mahabharata exploring dharma, destiny, and moral complexity.", badge: "Fiction" },
+            { title: "The Aspern Papers", author: "Henry James", snippet: "A novella about a literary detective seeking love letters from a famous romantic poet.", badge: "Fiction" },
+            { title: "The Turn of the Screw", author: "Henry James", snippet: "A chilling Gothic ghost story told by a governess haunted by mysterious figures.", badge: "Fiction" },
+            
+            // Additional Popular Fiction
+            { title: "The Midnight Library", author: "Matt Haig", snippet: "Between life and death exists a library where Nora Seed explores all the lives she could have lived.", badge: "Fiction" },
+            { title: "The Seven Husbands of Evelyn Hugo", author: "Taylor Jenkins Reid", snippet: "A legendary actress reveals her scandalous life story to an unknown journalist.", badge: "Fiction" },
+            { title: "Project Hail Mary", author: "Andy Weir", snippet: "A lone astronaut must save humanity in this thrilling hard sci-fi adventure.", badge: "Fiction" },
+            { title: "The Night Circus", author: "Erin Morgenstern", snippet: "A magical competition unfolds in a mysterious circus that appears without warning.", badge: "Fiction" },
+            { title: "All the Light We Cannot See", author: "Anthony Doerr", snippet: "A blind French girl and a German boy's paths collide in occupied France during WWII.", badge: "Fiction" },
+            { title: "The Goldfinch", author: "Donna Tartt", snippet: "A stolen painting becomes the center of a young man's coming-of-age story.", badge: "Fiction" },
+            { title: "Station Eleven", author: "Emily St. John Mandel", snippet: "A post-apocalyptic novel about a traveling theater troupe performing Shakespeare.", badge: "Fiction" },
+            { title: "The Overstory", author: "Richard Powers", snippet: "Nine strangers brought together by trees in an epic environmental fable.", badge: "Fiction" },
+            { title: "Normal People", author: "Sally Rooney", snippet: "Two Irish teenagers navigate love, class, and connection across their early adult years.", badge: "Fiction" },
+            { title: "The Song of Achilles", author: "Madeline Miller", snippet: "A lyrical retelling of the Iliad from Patroclus's perspective.", badge: "Fiction" },
+            { title: "Circe", author: "Madeline Miller", snippet: "The witch from the Odyssey claims her own story in this feminist mythology retelling.", badge: "Fiction" },
+            { title: "The Kite Runner", author: "Khaled Hosseini", snippet: "A powerful story of friendship, betrayal, and redemption set in Afghanistan.", badge: "Fiction" },
+            { title: "Life of Pi", author: "Yann Martel", snippet: "A boy survives 227 days at sea with a Bengal tiger in this philosophical adventure.", badge: "Fiction" },
+            { title: "The Road", author: "Cormac McCarthy", snippet: "A father and son journey through a post-apocalyptic wasteland.", badge: "Fiction" },
+            { title: "Never Let Me Go", author: "Kazuo Ishiguro", snippet: "Students at an English boarding school discover their disturbing destiny.", badge: "Fiction" },
+            { title: "The Book Thief", author: "Markus Zusak", snippet: "Death narrates a story of a girl stealing books in Nazi Germany.", badge: "Fiction" },
+            { title: "Cloud Atlas", author: "David Mitchell", snippet: "Six interconnected stories spanning from the 19th century to a post-apocalyptic future.", badge: "Fiction" },
+            { title: "The Underground Railroad", author: "Colson Whitehead", snippet: "A literal underground railroad helps slaves escape the antebellum South.", badge: "Fiction" },
+            { title: "Beloved", author: "Toni Morrison", snippet: "A haunting tale of slavery's legacy and a mother's desperate choice.", badge: "Fiction" },
+            { title: "One Hundred Years of Solitude", author: "Gabriel García Márquez", snippet: "The Buendía family saga across seven generations in the magical town of Macondo.", badge: "Fiction" },
+            
+            // NEW ADDITIONS - Classic Literature
+            { title: "The Invisible Man", author: "Ralph Ellison", snippet: "A powerful exploration of racial identity and invisibility in American society.", badge: "Fiction" },
+            { title: "The Picture of Dorian Gray", author: "Oscar Wilde", snippet: "A man's portrait ages while he remains young, leading to moral corruption and horror.", badge: "Fiction" },
+            { title: "Lord of the Flies", author: "William Golding", snippet: "British schoolboys stranded on an island descend into savagery and chaos.", badge: "Fiction" },
+            { title: "Animal Farm", author: "George Orwell", snippet: "A satirical allegory of totalitarianism where farm animals rebel against their human master.", badge: "Fiction" },
+            { title: "1984", author: "George Orwell", snippet: "A dystopian masterpiece about surveillance, control, and the death of truth.", badge: "Fiction" },
+            { title: "Heart of Darkness", author: "Joseph Conrad", snippet: "A journey into the Congo reveals the darkness at the heart of colonialism.", badge: "Fiction" },
+            { title: "The Great Gatsby", author: "F. Scott Fitzgerald", snippet: "The American Dream unravels in this Jazz Age tale of wealth, love, and tragedy.", badge: "Fiction" },
+            { title: "Pride and Prejudice", author: "Jane Austen", snippet: "Elizabeth Bennet navigates love, class, and first impressions in Regency England.", badge: "Fiction" },
+            { title: "Wuthering Heights", author: "Emily Brontë", snippet: "A tempestuous tale of passion, revenge, and love on the Yorkshire moors.", badge: "Fiction" },
+            { title: "The Sun Also Rises", author: "Ernest Hemingway", snippet: "Lost Generation expatriates search for meaning in post-WWI Europe.", badge: "Fiction" },
+            { title: "Native Son", author: "Richard Wright", snippet: "A young Black man's life in 1930s Chicago leads to violence and tragedy.", badge: "Fiction" },
+            { title: "To Kill a Mockingbird", author: "Harper Lee", snippet: "A child's view of racial injustice in the Depression-era American South.", badge: "Fiction" },
+            { title: "The Grapes of Wrath", author: "John Steinbeck", snippet: "The Joad family's desperate journey during the Great Depression and Dust Bowl.", badge: "Fiction" },
+            { title: "Brave New World", author: "Aldous Huxley", snippet: "A dystopian vision of a pleasure-driven society where humans are engineered and conditioned.", badge: "Fiction" },
+            { title: "Lolita", author: "Vladimir Nabokov", snippet: "A controversial masterpiece narrated by an unreliable and morally reprehensible protagonist.", badge: "Fiction" },
+            { title: "Metamorphosis", author: "Franz Kafka", snippet: "Gregor Samsa wakes to find himself transformed into a monstrous insect.", badge: "Fiction" },
+            { title: "The Book of Disquiet", author: "Fernando Pessoa", snippet: "Fragmentary reflections on existence, dreams, and the melancholy of being.", badge: "Fiction" },
+            
+            // NONFICTION - Original + Expanded
+            { title: "Why Nations Fail", author: "Daron Acemoglu & James A Robinson", snippet: "A groundbreaking exploration of how political and economic institutions determine prosperity.", badge: "Nonfiction" },
+            { title: "How Asia Works", author: "Joe Studwell", snippet: "Reveals the economic strategies behind East Asia's miraculous growth and development.", badge: "Nonfiction" },
+            { title: "The Myth of Free Trade", author: "Paul Bairoch", snippet: "A historical analysis challenging conventional wisdom about free trade and economic growth.", badge: "Nonfiction" },
+            { title: "How Countries Go Broke", author: "Ray Dalio", snippet: "An examination of sovereign debt crises and the patterns that lead nations to bankruptcy.", badge: "Nonfiction" },
+            { title: "The Sexual Politics of Meat", author: "Carol J Adams", snippet: "A feminist-vegetarian analysis linking meat consumption to patriarchal violence.", badge: "Nonfiction" },
+            { title: "Nexus", author: "Yuval Noah Harari", snippet: "An exploration of information networks and how they shape human civilization and power.", badge: "Nonfiction" },
+            { title: "Open", author: "Andre Agassi", snippet: "A brutally honest memoir from tennis legend Agassi about fame, pressure, and redemption.", badge: "Nonfiction" },
+            { title: "Man's Search for Meaning", author: "Viktor Frankl", snippet: "A psychiatrist's profound account of surviving Auschwitz and finding purpose in suffering.", badge: "Nonfiction" },
+            { title: "A Walk in the Woods", author: "Bill Bryson", snippet: "A hilarious account of hiking the Appalachian Trail filled with history and misadventures.", badge: "Nonfiction" },
+            { title: "Braiding Sweetgrass", author: "Robin Wall Kimmerer", snippet: "Indigenous wisdom meets botanical science in this meditation on reciprocity with nature.", badge: "Nonfiction" },
+            { title: "Imaginary Homelands", author: "Salman Rushdie", snippet: "Essays on literature, politics, and identity from one of our greatest living writers.", badge: "Nonfiction" },
+            { title: "How to Win an Information War", author: "Peter Pomerantsev", snippet: "The story of pioneering disinformation fighters during World War II and lessons for today.", badge: "Nonfiction" },
+            { title: "Delay, Deny, Defend", author: "Jay M Feinman", snippet: "An exposé of insurance company tactics and why they don't pay claims as promised.", badge: "Nonfiction" },
+            { title: "The Good War", author: "Studs Terkel", snippet: "Oral histories of World War II from Americans across all walks of life and perspectives.", badge: "Nonfiction" },
+            
+            // Additional Popular Nonfiction
+            { title: "Sapiens", author: "Yuval Noah Harari", snippet: "A brief history of humankind from the Stone Age to the modern age.", badge: "Nonfiction" },
+            { title: "Educated", author: "Tara Westover", snippet: "A memoir of a woman who leaves her survivalist family to pursue education.", badge: "Nonfiction" },
+            { title: "Thinking, Fast and Slow", author: "Daniel Kahneman", snippet: "Nobel laureate reveals the two systems that drive the way we think.", badge: "Nonfiction" },
+            { title: "The Immortal Life of Henrietta Lacks", author: "Rebecca Skloot", snippet: "The story of the woman whose cells revolutionized medicine without her knowledge.", badge: "Nonfiction" },
+            { title: "Born a Crime", author: "Trevor Noah", snippet: "Stories from a South African childhood during and after apartheid.", badge: "Nonfiction" },
+            { title: "When Breath Becomes Air", author: "Paul Kalanithi", snippet: "A neurosurgeon's profound memoir written as he faced terminal cancer.", badge: "Nonfiction" },
+            { title: "The Gene", author: "Siddhartha Mukherjee", snippet: "An intimate history of genetics and its impact on our lives.", badge: "Nonfiction" },
+            { title: "Bad Blood", author: "John Carreyrou", snippet: "The rise and fall of Theranos and Elizabeth Holmes's billion-dollar deception.", badge: "Nonfiction" },
+            { title: "The Power of Habit", author: "Charles Duhigg", snippet: "Why we do what we do in life and business, and how to change it.", badge: "Nonfiction" },
+            { title: "Atomic Habits", author: "James Clear", snippet: "Tiny changes that create remarkable results in building good habits.", badge: "Nonfiction" },
+            { title: "The Body Keeps the Score", author: "Bessel van der Kolk", snippet: "Brain, mind, and body in the healing of trauma.", badge: "Nonfiction" },
+            { title: "Guns, Germs, and Steel", author: "Jared Diamond", snippet: "The fates of human societies explained through geography and environment.", badge: "Nonfiction" },
+            { title: "The Emperor of All Maladies", author: "Siddhartha Mukherjee", snippet: "A biography of cancer and humanity's quest to cure it.", badge: "Nonfiction" },
+            { title: "Quiet", author: "Susan Cain", snippet: "The power of introverts in a world that can't stop talking.", badge: "Nonfiction" },
+            { title: "The Sixth Extinction", author: "Elizabeth Kolbert", snippet: "An unnatural history of our current mass extinction event.", badge: "Nonfiction" },
+            
+            // NEW ADDITIONS - Nonfiction
+            { title: "From Shiva to Schrödinger", author: "Dr Mrittunjoy Guha Majumdar", snippet: "Unravelling cosmic secrets with Trika Shaivism and quantum insights.", badge: "Nonfiction" },
+            { title: "The Laundromat", author: "Jake Bernstein", snippet: "Inside the Panama Papers investigation of the world's richest and most secretive offshore economy.", badge: "Nonfiction" },
+            { title: "How to Lose a War", author: "Bill Fawcett", snippet: "More foolish plans and great military blunders throughout history.", badge: "Nonfiction" },
+            { title: "The Flame", author: "Leonard Cohen", snippet: "Final poems and writings from the legendary singer-songwriter.", badge: "Nonfiction" },
+            { title: "The Disappearance of Rituals", author: "Byung-Chul Han", snippet: "A topology of the present examining the loss of rituals in modern life.", badge: "Nonfiction" },
+            { title: "The Bomb, The Bank, The Mullah and The Poppies", author: "Iqbal Chand Malhotra", snippet: "A tale of deception exploring the complex geopolitics of South Asia.", badge: "Nonfiction" },
+            { title: "Why Greatness Cannot Be Planned", author: "Kenneth O. Stanley", snippet: "The myth of the objective and how innovation really happens.", badge: "Nonfiction" },
+            { title: "The Awakening of Intelligence", author: "J. Krishnamurti", snippet: "Conversations on the nature of consciousness, meditation, and human potential.", badge: "Nonfiction" },
+            
+            // PHILOSOPHY - Original + Expanded
+            { title: "Being and Nothingness", author: "Jean-Paul Sartre", snippet: "Sartre's magnum opus on existentialism, freedom, consciousness, and human existence.", badge: "Philosophy" },
+            { title: "The Myth of Sisyphus", author: "Albert Camus", snippet: "Camus confronts the absurdity of existence and asks whether life is worth living.", badge: "Philosophy" },
+            { title: "Nausea", author: "Jean-Paul Sartre", snippet: "A philosophical novel exploring existential dread through a historian's crisis of meaning.", badge: "Philosophy" },
+            { title: "The Machine Stops", author: "E M Forster", snippet: "A prescient dystopian tale warning against over-reliance on technology and isolation.", badge: "Philosophy" },
+            
+            // Additional Philosophy
+            { title: "Meditations", author: "Marcus Aurelius", snippet: "Personal writings of the Roman Emperor on Stoic philosophy and self-improvement.", badge: "Philosophy" },
+            { title: "The Republic", author: "Plato", snippet: "Socratic dialogues on justice, the ideal state, and the nature of reality.", badge: "Philosophy" },
+            { title: "Thus Spoke Zarathustra", author: "Friedrich Nietzsche", snippet: "Nietzsche's philosophical novel introducing the concept of the Übermensch.", badge: "Philosophy" },
+            { title: "The Stranger", author: "Albert Camus", snippet: "An absurdist novel about an emotionally detached man who commits murder.", badge: "Philosophy" },
+            { title: "Letters from a Stoic", author: "Seneca", snippet: "Ancient wisdom on living a good life through Stoic principles.", badge: "Philosophy" },
+            { title: "The Ethics", author: "Baruch Spinoza", snippet: "A geometric demonstration of philosophy and God's nature.", badge: "Philosophy" },
+            { title: "Critique of Pure Reason", author: "Immanuel Kant", snippet: "Kant's groundbreaking work on the limits and structure of human knowledge.", badge: "Philosophy" },
+            { title: "The Second Sex", author: "Simone de Beauvoir", snippet: "A foundational feminist text examining the treatment of women throughout history.", badge: "Philosophy" },
+            { title: "Justice", author: "Michael J. Sandel", snippet: "What's the right thing to do? A modern exploration of moral philosophy.", badge: "Philosophy" },
+            { title: "The Problems of Philosophy", author: "Bertrand Russell", snippet: "An accessible introduction to fundamental philosophical questions.", badge: "Philosophy" },
+            
+            // NEW ADDITIONS - Philosophy
+            { title: "The Conspiracy against the Human Race", author: "Thomas Ligotti", snippet: "A philosophical horror examining pessimism, consciousness, and the burden of existence.", badge: "Philosophy" },
+            { title: "Dattatreya", author: "Antonio Rigopoulos", snippet: "A study of the multifaceted Hindu deity and his place in religious history.", badge: "Philosophy" },
+            
+            // NEW ADDITIONS - More Fiction, Sci-Fi, Classics
+            { title: "Água Viva", author: "Clarice Lispector", snippet: "A stream-of-consciousness meditation on art, existence, and the nature of writing.", badge: "Women Writers" },
+            { title: "Alias Grace", author: "Margaret Atwood", snippet: "A Victorian murder mystery exploring memory, identity, and the unreliability of truth.", badge: "Women Writers" },
+            { title: "Ariel", author: "Sylvia Plath", snippet: "Plath's final poetry collection, raw and powerful explorations of depression and rebirth.", badge: "Women Writers" },
+            { title: "Brave New World", author: "Aldous Huxley", snippet: "A dystopian vision of a pleasure-driven society where humans are engineered and conditioned.", badge: "Fiction" },
+            { title: "Butter", author: "Asako Yuzuki", snippet: "A Japanese novelist investigates a woman accused of murder through elaborate meals.", badge: "Women Writers" },
+            { title: "Children of Time", author: "Adrian Tchaikovsky", snippet: "Uplifted spiders evolve on a terraformed world as humanity searches for a new home.", badge: "Fiction" },
+            { title: "Convenience Store Woman", author: "Sayaka Murata", snippet: "A woman finds purpose and identity working at a Tokyo convenience store.", badge: "Women Writers" },
+            { title: "Dark Matter", author: "Blake Crouch", snippet: "A physicist is abducted into a reality of infinite parallel worlds and impossible choices.", badge: "Fiction" },
+            { title: "Death on the Nile", author: "Agatha Christie", snippet: "Hercule Poirot investigates murder on a luxurious cruise down the Nile River.", badge: "Women Writers" },
+            { title: "Dept. of Speculation", author: "Jenny Offill", snippet: "Fragmentary reflections on marriage, motherhood, and the slow erosion of dreams.", badge: "Women Writers" },
+            { title: "Drive Your Plow Over the Bones of the Dead", author: "Olga Tokarczuk", snippet: "An eccentric woman investigates mysterious deaths in a remote Polish village.", badge: "Women Writers" },
+            { title: "Dune", author: "Frank Herbert", snippet: "Epic saga of politics, religion, and ecology on the desert planet Arrakis.", badge: "Fiction" },
+            { title: "Elena Knows", author: "Claudia Piñeiro", snippet: "A mother with Parkinson's investigates her daughter's death in Buenos Aires.", badge: "Women Writers" },
+            { title: "Ender's Game", author: "Orson Scott Card", snippet: "A child prodigy is trained in military strategy to save humanity from alien invasion.", badge: "Fiction" },
+            { title: "Foundation", author: "Isaac Asimov", snippet: "Mathematicians predict the fall of empire and create a foundation to preserve knowledge.", badge: "Fiction" },
+            { title: "Go Set a Watchman", author: "Harper Lee", snippet: "Scout Finch returns to Alabama as an adult to face her father's legacy and beliefs.", badge: "Women Writers" },
+            { title: "Hyperion", author: "Dan Simmons", snippet: "Seven pilgrims journey to the Time Tombs, each sharing their tale in this sci-fi Canterbury Tales.", badge: "Fiction" },
+            { title: "Kindred", author: "Octavia Butler", snippet: "A Black woman is pulled back in time to a plantation where she must save her ancestor.", badge: "Women Writers" },
+            { title: "Leviathan Wakes", author: "James S. A. Corey", snippet: "A missing woman connects a detective and a ship captain in an explosive space mystery.", badge: "Fiction" },
+            { title: "Murder on the Orient Express", author: "Agatha Christie", snippet: "Poirot solves a murder on a snowbound train where every passenger is a suspect.", badge: "Women Writers" },
+            { title: "Mrs Dalloway", author: "Virginia Woolf", snippet: "A single day in post-WWI London through the consciousness of Clarissa Dalloway.", badge: "Women Writers" },
+            { title: "Near to the Wild Heart", author: "Clarice Lispector", snippet: "Lispector's debut novel following a woman's interior journey from childhood to adulthood.", badge: "Women Writers" },
+            { title: "Neuromancer", author: "William Gibson", snippet: "A washed-up hacker is hired for one last job in cyberspace in this cyberpunk classic.", badge: "Fiction" },
+            { title: "Notes from Underground", author: "Fyodor Dostoevsky", snippet: "A bitter man's confessions from beneath the floorboards of society.", badge: "Fiction" },
+            { title: "Old Man's War", author: "John Scalzi", snippet: "Senior citizens join the military to fight alien wars in exchange for youth and adventure.", badge: "Fiction" },
+            { title: "Orlando", author: "Virginia Woolf", snippet: "A nobleman lives for centuries, changing gender and witnessing history unfold.", badge: "Women Writers" },
+            { title: "Oryx and Crake", author: "Margaret Atwood", snippet: "A man may be the last human alive in a post-apocalyptic bioengineered world.", badge: "Women Writers" },
+            { title: "Outline", author: "Rachel Cusk", snippet: "A writer teaches in Athens, listening to others' stories while erasing her own.", badge: "Women Writers" },
+            { title: "Parable of the Sower", author: "Octavia Butler", snippet: "A young woman with hyper-empathy leads survivors in a collapsing America.", badge: "Women Writers" },
+            { title: "Rendezvous with Rama", author: "Arthur C. Clarke", snippet: "Humanity explores a mysterious cylindrical alien spacecraft passing through the solar system.", badge: "Fiction" },
+            { title: "Station Eleven", author: "Emily St. John Mandel", snippet: "A post-apocalyptic novel about a traveling theater troupe performing Shakespeare.", badge: "Women Writers" },
+            { title: "The Bell Jar", author: "Sylvia Plath", snippet: "A young woman's descent into mental illness in 1950s New York.", badge: "Women Writers" },
+            { title: "The Collected Poems", author: "Sylvia Plath", snippet: "The complete poetry of Sylvia Plath, from early verses to her final haunting work.", badge: "Women Writers" },
+            { title: "The Dispossessed", author: "Ursula K. Le Guin", snippet: "A physicist navigates between a capitalist and anarchist world, seeking unity.", badge: "Women Writers" },
+            { title: "The Handmaid's Tale", author: "Margaret Atwood", snippet: "A woman's account of life in a totalitarian theocracy where women are property.", badge: "Women Writers" },
+            { title: "The Hitchhiker's Guide to the Galaxy", author: "Douglas Adams", snippet: "Earth is demolished for a highway; one man escapes with an alien and a towel.", badge: "Fiction" },
+            { title: "The Hour of the Star", author: "Clarice Lispector", snippet: "The story of an impoverished typist in Rio de Janeiro, told with profound compassion.", badge: "Women Writers" },
+            { title: "The Idiot", author: "Fyodor Dostoevsky", snippet: "A compassionate prince returns to Russia and confronts a corrupt society.", badge: "Fiction" },
+            { title: "The Left Hand of Darkness", author: "Ursula K. Le Guin", snippet: "An envoy visits a planet where inhabitants can change gender, exploring identity and politics.", badge: "Women Writers" },
+            { title: "The Murder of Roger Ackroyd", author: "Agatha Christie", snippet: "Poirot investigates a murder in an English village with a shocking narrative twist.", badge: "Women Writers" },
+            { title: "The Passion According to G.H.", author: "Clarice Lispector", snippet: "A woman's existential crisis after encountering a cockroach in her maid's room.", badge: "Women Writers" },
+            { title: "The Testaments", author: "Margaret Atwood", snippet: "The sequel to The Handmaid's Tale, told through three women's perspectives.", badge: "Women Writers" },
+            { title: "The Three-Body Problem", author: "Liu Cixin", snippet: "First contact with an alien civilization during China's Cultural Revolution.", badge: "Fiction" },
+            { title: "The Vegetarian", author: "Han Kang", snippet: "A woman's decision to stop eating meat triggers a devastating family crisis.", badge: "Women Writers" },
+            { title: "The Waves", author: "Virginia Woolf", snippet: "Six friends' inner lives narrated as poetic soliloquies from childhood to old age.", badge: "Women Writers" },
+            { title: "To the Lighthouse", author: "Virginia Woolf", snippet: "The Ramsay family and guests contemplate life, death, and art at their summer home.", badge: "Women Writers" },
+            
+            // NEW ADDITIONS - Nonfiction & Spiritual
+            { title: "A Room of One's Own", author: "Virginia Woolf", snippet: "Woolf's groundbreaking essay on women, writing, and economic independence.", badge: "Nonfiction" },
+            { title: "A Short History of Nearly Everything", author: "Bill Bryson", snippet: "A witty journey through science, from the Big Bang to human civilization.", badge: "Nonfiction" },
+            { title: "Awareness", author: "Osho", snippet: "Osho's insights on becoming fully present and aware in every moment of life.", badge: "Philosophy" },
+            { title: "Be As You Are", author: "Ramana Maharshi", snippet: "The essential teachings of self-inquiry and non-dual awareness from the sage of Arunachala.", badge: "Philosophy" },
+            { title: "City of Djinns", author: "William Dalrymple", snippet: "A year in Delhi exploring its history, from Mughal emperors to modern chaos.", badge: "Nonfiction" },
+            { title: "Commentaries on Living", author: "J. Krishnamurti", snippet: "Dialogues exploring freedom, fear, and the nature of consciousness.", badge: "Philosophy" },
+            { title: "Essence of the Upanishads", author: "Eknath Easwaran", snippet: "A clear introduction to the timeless wisdom of India's ancient spiritual texts.", badge: "Philosophy" },
+            { title: "Freedom", author: "Osho", snippet: "Osho on the courage to be yourself and break free from social conditioning.", badge: "Philosophy" },
+            { title: "Freedom from the Known", author: "J. Krishnamurti", snippet: "Krishnamurti challenges us to free our minds from all psychological conditioning.", badge: "Philosophy" },
+            { title: "Gita for Daily Living", author: "A. Parthasarathy", snippet: "Practical commentary on the Bhagavad Gita for modern life.", badge: "Philosophy" },
+            { title: "Guns, Gods and Missionaries", author: "Manu S. Pillai", snippet: "How colonialism reshaped India through violence, religion, and cultural transformation.", badge: "Nonfiction" },
+            { title: "How To", author: "Randall Munroe", snippet: "Absurd scientific answers to impractical real-world problems.", badge: "Nonfiction" },
+            { title: "I Am That", author: "Nisargadatta Maharaj", snippet: "Profound conversations on self-realization and the nature of consciousness.", badge: "Philosophy" },
+            { title: "Inglorious Empire", author: "Shashi Tharoor", snippet: "A devastating account of British colonialism's impact on India.", badge: "Nonfiction" },
+            { title: "Intimacy", author: "Osho", snippet: "Osho explores love, relationships, and the art of being truly intimate.", badge: "Philosophy" },
+            { title: "Maximum City", author: "Suketu Mehta", snippet: "A sprawling portrait of Bombay's extremes, dreams, and contradictions.", badge: "Nonfiction" },
+            { title: "Nine Lives", author: "William Dalrymple", snippet: "Nine journeys into the heart of contemporary Indian spirituality and faith.", badge: "Nonfiction" },
+            { title: "Self Unfoldment", author: "Swami Chinmayananda", snippet: "A guide to spiritual growth through Vedantic self-inquiry.", badge: "Philosophy" },
+            { title: "Surely You're Joking, Mr Feynman!", author: "Richard Feynman", snippet: "Adventures of a curious physicist: from safe-cracking to Nobel Prizes.", badge: "Nonfiction" },
+            { title: "The Anarchy", author: "William Dalrymple", snippet: "How the East India Company conquered India and pillaged a civilization.", badge: "Nonfiction" },
+            { title: "The Book of Mirdad", author: "Mikhail Naimy", snippet: "A mystical allegory about spiritual awakening and the path to enlightenment.", badge: "Philosophy" },
+            { title: "The Difficulty of Being Good", author: "Gurcharan Das", snippet: "Exploring dharma and moral dilemmas through the lens of the Mahabharata.", badge: "Philosophy" },
+            { title: "The Ending of Time", author: "J. Krishnamurti (with David Bohm)", snippet: "Conversations between a philosopher and a physicist on consciousness and reality.", badge: "Philosophy" },
+            { title: "The First and Last Freedom", author: "J. Krishnamurti", snippet: "Krishnamurti's radical approach to self-knowledge and psychological freedom.", badge: "Philosophy" },
+            { title: "The Ivory Throne", author: "Manu S. Pillai", snippet: "The story of Travancore's powerful queens and the kingdom's transformation.", badge: "Nonfiction" },
+            { title: "Think on These Things", author: "J. Krishnamurti", snippet: "Conversations with students on education, fear, ambition, and love.", badge: "Philosophy" },
+            { title: "Vedanta Treatise", author: "A. Parthasarathy", snippet: "A systematic exposition of Vedanta philosophy for contemporary seekers.", badge: "Philosophy" },
+            { title: "We Must Live the Gita", author: "Swami Chinmayananda", snippet: "Bringing the Bhagavad Gita's teachings into daily practice and experience.", badge: "Philosophy" },
+            { title: "What If?", author: "Randall Munroe", snippet: "Serious scientific answers to absurd hypothetical questions.", badge: "Nonfiction" },
+            { title: "Zen Mind, Beginner's Mind", author: "Shunryu Suzuki", snippet: "Essential teachings on Zen meditation and practice for beginners and masters alike.", badge: "Philosophy" }
+        ];
+        
+        // Shuffle array function
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+        
+        // Get daily shuffled picks (resets daily)
+        function getDailyShuffledPicks() {
+            const today = new Date().toDateString();
+            const stored = localStorage.getItem('dailyPicksDate');
+            const storedPicks = localStorage.getItem('dailyPicks');
+            
+            // If today's picks already exist, use them
+            if (stored === today && storedPicks) {
+                return JSON.parse(storedPicks);
+            }
+            
+            // Otherwise, create new shuffled picks for today
+            const shuffled = shuffleArray(completeBookDatabase);
+            localStorage.setItem('dailyPicks', JSON.stringify(shuffled));
+            localStorage.setItem('dailyPicksDate', today);
+            return shuffled;
+        }
+        
+        let editorsPicks = getDailyShuffledPicks();
+        let currentFilter = 'all';
+        
+        // Elements
+        const quizSection = document.getElementById('quizSection');
+        const readingListContainer = document.getElementById('readingListContainer');
+        const clearListBtn = document.getElementById('clearListBtn');
+        const picksGrid = document.getElementById('picksGrid');
+        const addManualBookBtn = document.getElementById('addManualBookBtn');
+        const manualTitle = document.getElementById('manualTitle');
+        const manualAuthor = document.getElementById('manualAuthor');
+        const getRandomBtn = document.getElementById('getRandomBtn');
+        const categorySelect = document.getElementById('categorySelect');
+        const randomBookDisplay = document.getElementById('randomBookDisplay');
+        const randomBookCard = document.getElementById('randomBookCard');
+        
+        // Initialize
+        renderReadingList();
+        renderEditorsPicks();
+        
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                renderEditorsPicks();
+            });
+        });
+        
+        // Manual book addition
+        addManualBookBtn.addEventListener('click', () => {
+            const title = manualTitle.value.trim();
+            const author = manualAuthor.value.trim();
+            
+            if (!title || !author) {
+                alert('Please enter both title and author');
+                return;
+            }
+            
+            addToReadingList(title, author);
+            
+            // Clear inputs
+            manualTitle.value = '';
+            manualAuthor.value = '';
+            manualTitle.focus();
+            
+            // Success feedback
+            addManualBookBtn.textContent = '✓ Added to List!';
+            setTimeout(() => {
+                addManualBookBtn.textContent = 'Add to Reading List';
+            }, 2000);
+        });
+        
+        // Random book generator
+        getRandomBtn.addEventListener('click', () => {
+            const category = categorySelect.value;
+            let booksToChooseFrom = completeBookDatabase; // Use complete database!
+            
+            if (category !== 'all') {
+                booksToChooseFrom = completeBookDatabase.filter(book => book.badge === category);
+            }
+            
+            if (booksToChooseFrom.length === 0) {
+                alert('No books in this category!');
+                return;
+            }
+            
+            // Pick a random book
+            const randomIndex = Math.floor(Math.random() * booksToChooseFrom.length);
+            const randomBook = booksToChooseFrom[randomIndex];
+            
+            // Display the random book
+            randomBookCard.innerHTML = `
+                <div class="rec-card">
+                    <h3 class="rec-title">${randomBook.title}</h3>
+                    <p class="rec-author">by ${randomBook.author}</p>
+                    <p class="rec-snippet">${randomBook.snippet}</p>
+                    <span class="pick-badge">${randomBook.badge}</span>
+                    <button class="add-to-list-btn" onclick="addToReadingList('${randomBook.title.replace(/'/g, "\\'")}', '${randomBook.author.replace(/'/g, "\\'")}')">+ Add to List</button>
+                </div>
+            `;
+            
+            randomBookDisplay.style.display = 'block';
+            updateAddButtons();
+            
+            // Scroll to result
+            setTimeout(() => {
+                randomBookDisplay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        });
+        
+        // Allow Enter key to add book
+        manualTitle.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                manualAuthor.focus();
+            }
+        });
+        
+        manualAuthor.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addManualBookBtn.click();
+            }
+        });
+        
+        
+        // Render Editor's Picks - Always shows 5 random books (no load more)
+        function renderEditorsPicks() {
+            const filteredPicks = currentFilter === 'all' 
+                ? editorsPicks 
+                : editorsPicks.filter(pick => pick.badge === currentFilter);
+            
+            // Always show exactly 5 books (no pagination)
+            const booksToShow = filteredPicks.slice(0, 5);
+            
+            picksGrid.innerHTML = booksToShow.map((pick) => {
+                return `
+                <div class="pick-card">
+                    <div class="pick-title">${pick.title}</div>
+                    <div class="pick-author">${pick.author}</div>
+                    <div class="pick-snippet">${pick.snippet}</div>
+                    <span class="pick-badge">${pick.badge}</span>
+                    <button class="add-to-list-btn" onclick="addToReadingList('${pick.title.replace(/'/g, "\\'")}', '${pick.author.replace(/'/g, "\\'")}')">+ Add to List</button>
+                </div>
+            `}).join('');
+            
+            updateAddButtons();
+        }
+        
+        // Clear completed
+        clearListBtn.addEventListener('click', () => {
+            readingList = readingList.filter(book => !book.completed);
+            saveReadingList();
+            renderReadingList();
+        });
+        
+        function addToReadingList(title, author) {
+            // Check if already in list
+            if (readingList.some(book => book.title === title)) {
+                // Update button to show it's added
+                updateAddButtons();
+                return;
+            }
+            
+            readingList.push({
+                title,
+                author,
+                completed: false,
+                addedAt: Date.now()
+            });
+            
+            saveReadingList();
+            renderReadingList();
+            updateAddButtons();
+            
+            // Scroll to reading list
+            setTimeout(() => {
+                document.querySelector('.reading-list').scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        }
+        
+        function toggleBookCompletion(index) {
+            readingList[index].completed = !readingList[index].completed;
+            saveReadingList();
+            renderReadingList();
+        }
+        
+        function removeFromList(index) {
+            readingList.splice(index, 1);
+            saveReadingList();
+            renderReadingList();
+            updateAddButtons();
+        }
+        
+        function saveReadingList() {
+            localStorage.setItem('readingList', JSON.stringify(readingList));
+        }
+        
+        function renderReadingList() {
+            if (readingList.length === 0) {
+                readingListContainer.innerHTML = '<div class="list-empty">Your reading list is empty. Add books from recommendations or editor\'s picks!</div>';
+                clearListBtn.classList.add('hidden');
+                return;
+            }
+            
+            readingListContainer.innerHTML = readingList.map((book, index) => `
+                <div class="list-item ${book.completed ? 'completed' : ''}" style="animation-delay: ${index * 0.05}s">
+                    <div class="list-checkbox ${book.completed ? 'checked' : ''}" onclick="toggleBookCompletion(${index})"></div>
+                    <div class="list-content">
+                        <div class="list-item-title">${book.title}</div>
+                        <div class="list-item-author">${book.author}</div>
+                    </div>
+                    <button class="remove-btn" onclick="removeFromList(${index})">×</button>
+                </div>
+            `).join('');
+            
+            // Show clear button if there are completed items
+            if (readingList.some(book => book.completed)) {
+                clearListBtn.classList.remove('hidden');
+            } else {
+                clearListBtn.classList.add('hidden');
+            }
+        }
+        
+        function updateAddButtons() {
+            // Update all add-to-list buttons
+            document.querySelectorAll('.add-to-list-btn').forEach(btn => {
+                const card = btn.closest('.pick-card, .book-card, .rec-card');
+                if (!card) return; // Skip if no parent card found
+                
+                const title = card.querySelector('.pick-title, .book-title, .rec-title')?.textContent;
+                
+                if (title && readingList.some(book => book.title === title)) {
+                    btn.textContent = '✓ Added';
+                    btn.classList.add('added');
+                } else {
+                    btn.textContent = '+ Add to List';
+                    btn.classList.remove('added');
+                }
+            });
+        }
+        
+        // Register service worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/book-sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registered:', registration);
+                    })
+                    .catch(error => {
+                        console.log('ServiceWorker registration failed:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
