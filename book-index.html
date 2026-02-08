@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Shelf - Browse 200+ curated books sorted alphabetically">
+    <meta name="theme-color" content="#D92B2B">
+    <title>Shelf - Book Index</title>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bauhaus-red: #D92B2B;
+            --bauhaus-blue: #1E5B9E;
+            --bauhaus-yellow: #F1B422;
+            --bauhaus-black: #1A1A1A;
+            --bauhaus-cream: #E8E4D9;
+            --bauhaus-teal: #3E7E8E;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bauhaus-cream);
+            color: var(--bauhaus-black);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 48px;
+            padding: 40px 24px;
+            background: var(--bauhaus-black);
+            color: white;
+            margin: -40px -24px 48px -24px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: var(--bauhaus-red);
+            border-radius: 50%;
+            opacity: 0.2;
+        }
+        
+        h1 {
+            font-family: 'Crimson Pro', serif;
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .tagline {
+            font-size: 14px;
+            color: var(--bauhaus-yellow);
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 48px;
+        }
+        
+        .stat-card {
+            background: white;
+            border: 3px solid var(--bauhaus-black);
+            padding: 24px;
+            text-align: center;
+            box-shadow: 4px 4px 0 var(--bauhaus-black);
+        }
+        
+        .stat-number {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--bauhaus-red);
+            font-family: 'Crimson Pro', serif;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--bauhaus-blue);
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        
+        .section-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: -0.01em;
+            border-left: 6px solid var(--bauhaus-red);
+            padding-left: 16px;
+        }
+        
+        .category-nav {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .category-btn {
+            padding: 10px 20px;
+            background: white;
+            border: 3px solid var(--bauhaus-black);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .category-btn:hover {
+            background: var(--bauhaus-yellow);
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0 var(--bauhaus-black);
+        }
+        
+        .category-btn.active {
+            background: var(--bauhaus-red);
+            color: white;
+        }
+        
+        .book-list {
+            background: white;
+            border: 3px solid var(--bauhaus-black);
+            box-shadow: 6px 6px 0 var(--bauhaus-black);
+        }
+        
+        .book-item {
+            padding: 20px 24px;
+            border-bottom: 2px solid var(--bauhaus-cream);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .book-item:last-child {
+            border-bottom: none;
+        }
+        
+        .book-item:hover {
+            background: var(--bauhaus-cream);
+        }
+        
+        .book-info {
+            flex: 1;
+        }
+        
+        .book-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--bauhaus-black);
+        }
+        
+        .book-author {
+            font-size: 14px;
+            color: var(--bauhaus-blue);
+            font-weight: 500;
+        }
+        
+        .book-badge {
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 2px solid var(--bauhaus-black);
+            white-space: nowrap;
+        }
+        
+        .badge-fiction {
+            background: var(--bauhaus-red);
+            color: white;
+        }
+        
+        .badge-nonfiction {
+            background: var(--bauhaus-blue);
+            color: white;
+        }
+        
+        .badge-philosophy {
+            background: var(--bauhaus-yellow);
+            color: var(--bauhaus-black);
+        }
+        
+        .badge-women-writers {
+            background: var(--bauhaus-teal);
+            color: white;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 16px 20px;
+            border: 3px solid var(--bauhaus-black);
+            font-size: 16px;
+            font-family: 'DM Sans', sans-serif;
+            margin-bottom: 24px;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            box-shadow: 4px 4px 0 var(--bauhaus-yellow);
+        }
+        
+        .cta-section {
+            background: var(--bauhaus-black);
+            color: white;
+            padding: 48px 32px;
+            text-align: center;
+            margin-top: 64px;
+        }
+        
+        .cta-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+        
+        .cta-text {
+            font-size: 16px;
+            margin-bottom: 24px;
+            opacity: 0.9;
+        }
+        
+        .cta-btn {
+            display: inline-block;
+            padding: 16px 40px;
+            background: var(--bauhaus-red);
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 3px solid var(--bauhaus-red);
+            transition: all 0.3s ease;
+        }
+        
+        .cta-btn:hover {
+            background: var(--bauhaus-yellow);
+            color: var(--bauhaus-black);
+            border-color: var(--bauhaus-yellow);
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0 var(--bauhaus-red);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 32px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .empty-state {
+            padding: 48px 24px;
+            text-align: center;
+            color: #666;
+        }
+        
+        @media (max-width: 640px) {
+            h1 {
+                font-size: 36px;
+            }
+            
+            .section-title {
+                font-size: 24px;
+            }
+            
+            .book-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>📚 Shelf</h1>
+        <p class="tagline">Complete Book Index</p>
+    </header>
+    
+    <div class="container">
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalBooks">0</div>
+                <div class="stat-label">Total Books</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">4</div>
+                <div class="stat-label">Categories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="filteredCount">0</div>
+                <div class="stat-label">Showing</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">Browse All Books</h2>
+            
+            <input 
+                type="text" 
+                class="search-box" 
+                id="searchInput" 
+                placeholder="Search by title or author..."
+            >
+            
+            <div class="category-nav">
+                <button class="category-btn active" data-category="all">All Books</button>
+                <button class="category-btn" data-category="Fiction">Fiction</button>
+                <button class="category-btn" data-category="Nonfiction">Nonfiction</button>
+                <button class="category-btn" data-category="Philosophy">Philosophy</button>
+                <button class="category-btn" data-category="Women Writers">Women Writers</button>
+            </div>
+            
+            <div class="book-list" id="bookList">
+                <!-- Books will be inserted here -->
+            </div>
+        </div>
+        
+        <div class="cta-section">
+            <h3 class="cta-title">Ready to Start Reading?</h3>
+            <p class="cta-text">Open the full app to get personalized recommendations and build your reading list</p>
+            <a href="book-recommender.html" class="cta-btn">Open Book App →</a>
+        </div>
+    </div>
+    
+    <footer>
+        Built with ❤️ • Sorted Alphabetically • PWA Ready
+    </footer>
+    
+    <script src="book-database.js"></script>
+    <script>
+        let currentCategory = 'all';
+        let searchQuery = '';
+        
+        // Update total count
+        document.getElementById('totalBooks').textContent = books.length;
+        
+        // Render books
+        function renderBooks() {
+            const bookList = document.getElementById('bookList');
+            
+            let filteredBooks = books;
+            
+            // Filter by category
+            if (currentCategory !== 'all') {
+                filteredBooks = books.filter(book => book.badge === currentCategory);
+            }
+            
+            // Filter by search query
+            if (searchQuery) {
+                filteredBooks = filteredBooks.filter(book => 
+                    book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    book.author.toLowerCase().includes(searchQuery.toLowerCase())
+                );
+            }
+            
+            // Update filtered count
+            document.getElementById('filteredCount').textContent = filteredBooks.length;
+            
+            if (filteredBooks.length === 0) {
+                bookList.innerHTML = '<div class="empty-state">No books found matching your criteria.</div>';
+                return;
+            }
+            
+            bookList.innerHTML = filteredBooks.map(book => `
+                <div class="book-item">
+                    <div class="book-info">
+                        <div class="book-title">${book.title}</div>
+                        <div class="book-author">${book.author}</div>
+                    </div>
+                    <div class="book-badge badge-${book.badge.toLowerCase().replace(/ /g, '-')}">${book.badge}</div>
+                </div>
+            `).join('');
+        }
+        
+        // Category filtering
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentCategory = btn.dataset.category;
+                renderBooks();
+            });
+        });
+        
+        // Search
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            renderBooks();
+        });
+        
+        // Initial render
+        renderBooks();
+    </script>
+</body>
+</html>
